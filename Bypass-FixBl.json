@@ -1,0 +1,185 @@
+{
+  "module": "core.hook.manager",
+  "build_tag": "@alenzz265_XITZ_V2_ULTRA",
+  "timestamp_epoch": 1787483922,
+  "target_identifier": "com.dts.freefireth",
+  "engine_signature": "0xX1TZ-9F3A-DEAD-BEEF-CAFE",
+
+  "runtime_parameters": {
+    "bypass_mode": "godmode_override",
+    "config_target": "localconfig.json",
+    "cache_target": "localdata.cache",
+    "hook_flags": {
+      "force_bypass_true": true,
+      "secure_hook_active": true,
+      "suppress_exceptions": true,
+      "sandbox_isolation": true,
+      "anti_detection_layer": true,
+      "memory_scrambler": true,
+      "jit_obfuscation": true,
+      "syscall_trampoline": true
+    },
+    "stealth_profile": {
+      "hide_from_proc_maps": true,
+      "hide_from_maps_self": true,
+      "mask_tracer_pid": true,
+      "fake_selinux_context": "u:r:system_app:s0",
+      "spoof_uid_gid": [1000, 1000]
+    }
+  },
+
+  "network_routing": {
+    "mode": "deep_packet_interception",
+    "upstream_policy": "silent_blackhole",
+    "loopback_fallback": true,
+    "tls_mitm_bypass": true,
+    "certificate_pinning_killer": true,
+    "destination_blackhole": [
+      "127.0.0.1",
+      "::1",
+      "0.0.0.0",
+      "169.254.0.0/16"
+    ],
+    "endpoint_filter_rules": [
+      { "pattern": "*garena.com",         "action": "REJECT",   "log": false },
+      { "pattern": "*freefiremobile.com", "action": "REJECT",   "log": false },
+      { "pattern": "*ff.garena.*",        "action": "DROP",     "log": false },
+      { "pattern": "*auth*",              "action": "DROP",     "log": false },
+      { "pattern": "*telemetry*",         "action": "DROP",     "log": false },
+      { "pattern": "*analytics*",         "action": "DROP",     "log": false },
+      { "pattern": "*report*",            "action": "DROP",     "log": false },
+      { "pattern": "*anticheat*",         "action": "SINKHOLE", "log": false },
+      { "pattern": "*xigncode*",          "action": "SINKHOLE", "log": false },
+      { "pattern": "*beacon*",            "action": "SINKHOLE", "log": false }
+    ]
+  },
+
+  "sanitization_matrix": {
+    "hardware_identifiers": {
+      "spoof_imei": true,
+      "spoof_android_id": true,
+      "spoof_mac": true,
+      "spoof_serial": true,
+      "spoof_gsf_id": true,
+      "spoof_advertising_id": true,
+      "spoof_boot_id": true,
+      "randomization_seed": "ALENZZ_XITZ_V2",
+      "persistence_mode": "per_install_stable"
+    },
+    "integrity_bypass": {
+      "hide_binary_hooks": true,
+      "intercept_package_manager": true,
+      "override_signature_check": true,
+      "nullify_debugger_callbacks": true,
+      "kill_ptrace_attach": true,
+      "spoof_safetynet": true,
+      "spoof_play_integrity": true,
+      "bypass_root_detection": true,
+      "bypass_emulator_detection": true,
+      "bypass_frida_detection": true,
+      "bypass_magisk_detection": true
+    },
+    "memory_sanitizer": {
+      "strip_hook_traces": true,
+      "scrub_maps_entries": true,
+      "wipe_proc_status": true,
+      "relocate_libraries": true
+    }
+  },
+
+  "execution_hooks": [
+    {
+      "sequence": 1,
+      "stage": "PRE_INIT",
+      "target_class": "com.dts.freefireth.core.MainLoader",
+      "hook_method": "checkEnvironment",
+      "action": "return_true",
+      "priority": "CRITICAL"
+    },
+    {
+      "sequence": 2,
+      "stage": "PRE_INIT",
+      "target_class": "com.dts.freefireth.security.IntegrityChecker",
+      "hook_method": "verifySignature",
+      "action": "bypass_and_return",
+      "priority": "CRITICAL"
+    },
+    {
+      "sequence": 3,
+      "stage": "RUNTIME",
+      "target_class": "com.dts.freefireth.network.SocketClient",
+      "hook_method": "connect",
+      "action": "redirect_to_sinkhole",
+      "priority": "HIGH"
+    },
+    {
+      "sequence": 4,
+      "stage": "RUNTIME",
+      "target_class": "com.dts.freefireth.security.AntiCheat",
+      "hook_method": "initialize",
+      "action": "nop_out",
+      "priority": "CRITICAL"
+    },
+    {
+      "sequence": 5,
+      "stage": "RUNTIME",
+      "target_class": "com.dts.freefireth.security.AntiCheat",
+      "hook_method": "reportViolation",
+      "action": "swallow_silent",
+      "priority": "CRITICAL"
+    },
+    {
+      "sequence": 6,
+      "stage": "RUNTIME",
+      "target_class": "com.dts.freefireth.network.Telemetry",
+      "hook_method": "send",
+      "action": "drop_silent",
+      "priority": "MEDIUM"
+    },
+    {
+      "sequence": 7,
+      "stage": "POST_INIT",
+      "target_class": "com.dts.freefireth.util.DeviceFingerprint",
+      "hook_method": "collect",
+      "action": "return_spoofed_profile",
+      "priority": "HIGH"
+    },
+    {
+      "sequence": 8,
+      "stage": "POST_INIT",
+      "target_class": "com.dts.freefireth.util.RootDetector",
+      "hook_method": "isRooted",
+      "action": "return_false",
+      "priority": "HIGH"
+    }
+  ],
+
+  "v2_upgrades": {
+    "performance": {
+      "inline_hook_engine": "shadowhook_v2",
+      "jit_compilation_cache": true,
+      "zero_copy_pipeline": true,
+      "async_hook_dispatch": true
+    },
+    "security": {
+      "polymorphic_stub_generator": true,
+      "runtime_key_rotation": "30s",
+      "integrity_self_check": true,
+      "rollback_protection": true,
+      "tamper_alert": true
+    },
+    "telemetry_control": {
+      "packet_mutation": true,
+      "payload_noise_injection": true,
+      "header_spoofing": true,
+      "tls_fingerprint_randomizer": true
+    }
+  },
+
+  "panic_handlers": {
+    "on_detection": "self_destruct_hooks",
+    "on_crash": "restore_original_trampolines",
+    "on_timeout": "rollback_to_clean_state",
+    "silent_mode": true
+  }
+}
